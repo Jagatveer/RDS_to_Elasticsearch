@@ -1,0 +1,36 @@
+#!/bin/sh
+# Simple init script
+# rdstail
+#
+workdir=/usr/local/bin
+
+start() {
+    cd $workdir
+    python /usr/local/bin/rds_tail_logs.py --aws_profile_name default --aws_region_name us-west-1 --output_format json --log_level DEBUG --db_instance_ids relayhealthdev --log_filename postgresql.log  --log_state_file log_state.json >> /var/log/RDStail.log &
+    echo "RDStail started."
+}
+
+stop() {
+    pid=`ps -ef | grep '[p]ython /usr/local/bin/rds_tail_logs.py' | awk '{ print $2 }'`
+    echo $pid
+    kill $pid
+    sleep 2
+    echo "RDStail killed."
+}
+
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  restart)
+    stop
+    start
+    ;;
+  *)
+    echo "Usage: /etc/init.d/rdstail {start|stop|restart}"
+    exit 1
+esac
+exit 0
